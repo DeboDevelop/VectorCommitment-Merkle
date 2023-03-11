@@ -64,6 +64,9 @@ func getWitnessProver(key string, root Node) ([]Node, error) {
 	for i, nodeKey := range keys {
 		if i == 0 {
 			parent = root
+			if parent.key != nodeKey {
+				return nil, errors.New(fmt.Sprintf("key %v doesn't exist in the Merkle Tree!", nodeKey))
+			}
 			leftChild = *root.left
 			rightChild = *root.right
 			continue
