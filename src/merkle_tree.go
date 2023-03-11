@@ -3,7 +3,10 @@ package main
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"errors"
 	"fmt"
+	"os"
+	"strings"
 )
 
 type Node struct {
@@ -53,9 +56,47 @@ func inorder(root Node) {
 	}
 }
 
+func getWitnessProver(key string, root Node) ([]Node, error) {
+	keys := strings.Split(key, "/")
+	fmt.Println(keys)
+	var parent, leftChild, rightChild Node
+	witnesses := make([]Node, 0)
+	for i, nodeKey := range keys {
+		if i == 0 {
+			parent = root
+			leftChild = *root.left
+			rightChild = *root.right
+			continue
+		}
+		if leftChild.key == nodeKey {
+			parent = leftChild
+			witnesses = append(witnesses, rightChild)
+		} else if rightChild.key == nodeKey {
+			parent = rightChild
+			witnesses = append(witnesses, leftChild)
+		} else {
+			return nil, errors.New(fmt.Sprintf("key %v doesn't exist in the Merkle Tree!", nodeKey))
+		}
+		if parent.left != nil {
+			leftChild = *parent.left
+		}
+		if parent.right != nil {
+			rightChild = *parent.right
+		}
+	}
+	return witnesses, nil
+}
+
 func main() {
 	dataList := []string{"1", "2", "3", "4", "5", "6"}
 	root := buildTree(dataList)
 	inorder(root)
 	fmt.Println()
+	key := "123456/1234/34/4"
+	witnesses, err := getWitnessProver(key, root)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(-1)
+	}
+	fmt.Println(witnesses)
 }
