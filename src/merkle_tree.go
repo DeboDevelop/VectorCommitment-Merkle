@@ -1,10 +1,13 @@
 package main
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 )
 
 type Node struct {
+	key   string
 	hash  string
 	left  *Node
 	right *Node
@@ -13,7 +16,9 @@ type Node struct {
 func hashContent(dataList []string) []Node {
 	hashedArr := make([]Node, 0)
 	for _, data := range dataList {
-		hashedArr = append(hashedArr, Node{data, nil, nil})
+		hash := sha256.New()
+		hash.Write([]byte(data))
+		hashedArr = append(hashedArr, Node{data, hex.EncodeToString(hash.Sum(nil)), nil, nil})
 	}
 	return hashedArr
 }
@@ -24,7 +29,9 @@ func buildTree(dataList []string) Node {
 		hashedTreeLeaf := make([]Node, 0)
 		i := 1
 		for i < len(hashedArr) {
-			newNode := Node{hashedArr[i-1].hash + hashedArr[i].hash, &hashedArr[i-1], &hashedArr[i]}
+			hash := sha256.New()
+			hash.Write([]byte(hashedArr[i-1].hash + hashedArr[i].hash))
+			newNode := Node{hashedArr[i-1].key + hashedArr[i].key, hex.EncodeToString(hash.Sum(nil)), &hashedArr[i-1], &hashedArr[i]}
 			hashedTreeLeaf = append(hashedTreeLeaf, newNode)
 			i = i + 2
 		}
@@ -40,7 +47,7 @@ func inorder(root Node) {
 	if root.left != nil {
 		inorder(*root.left)
 	}
-	fmt.Print(root.hash, " ")
+	fmt.Print(root.key, " ")
 	if root.right != nil {
 		inorder(*root.right)
 	}
