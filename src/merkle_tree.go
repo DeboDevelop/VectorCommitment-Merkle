@@ -60,33 +60,24 @@ func inorder(root Node) {
 }
 
 func getWitnessProver(key string, root Node) ([]Node, error) {
+	node := root
 	keys := strings.Split(key, "/")
-	var parent, leftChild, rightChild Node
 	witnesses := make([]Node, 0)
 	for i, nodeKey := range keys {
 		if i == 0 {
-			parent = root
-			if parent.key != nodeKey {
+			if node.key != nodeKey {
 				return nil, errors.New(fmt.Sprintf("key %v doesn't exist in the Merkle Tree!", nodeKey))
 			}
-			leftChild = *root.left
-			rightChild = *root.right
 			continue
 		}
-		if leftChild.key == nodeKey {
-			parent = leftChild
-			witnesses = append(witnesses, rightChild)
-		} else if rightChild.key == nodeKey {
-			parent = rightChild
-			witnesses = append(witnesses, leftChild)
+		if node.left.key == nodeKey {
+			witnesses = append(witnesses, *node.right)
+			node = *node.left
+		} else if node.right.key == nodeKey {
+			witnesses = append(witnesses, *node.left)
+			node = *node.right
 		} else {
 			return nil, errors.New(fmt.Sprintf("key %v doesn't exist in the Merkle Tree!", nodeKey))
-		}
-		if parent.left != nil {
-			leftChild = *parent.left
-		}
-		if parent.right != nil {
-			rightChild = *parent.right
 		}
 	}
 	return witnesses, nil
