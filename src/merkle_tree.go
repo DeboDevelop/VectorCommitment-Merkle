@@ -5,7 +5,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"os"
+	"strconv"
 	"strings"
 )
 
@@ -17,11 +17,19 @@ type Node struct {
 	parent *Node
 }
 
+func getAsciiSum(data string) string {
+	sum := 0
+	for _, char := range data {
+		sum = sum + int(char)
+	}
+	return strconv.Itoa(sum)
+}
+
 func hashContent(dataList []string) []Node {
 	hashedArr := make([]Node, 0)
 	for _, data := range dataList {
 		hash := sha256.New()
-		hash.Write([]byte(data))
+		hash.Write([]byte(getAsciiSum(data)))
 		hashedArr = append(hashedArr, Node{data, hex.EncodeToString(hash.Sum(nil)), nil, nil, nil})
 	}
 	return hashedArr
@@ -34,7 +42,7 @@ func buildTree(dataList []string) Node {
 		i := 1
 		for i < len(hashedArr) {
 			hash := sha256.New()
-			hash.Write([]byte(hashedArr[i-1].hash + hashedArr[i].hash))
+			hash.Write([]byte(getAsciiSum(hashedArr[i-1].hash + hashedArr[i].hash)))
 			newNode := Node{hashedArr[i-1].key + hashedArr[i].key, hex.EncodeToString(hash.Sum(nil)), &hashedArr[i-1], &hashedArr[i], nil}
 			hashedArr[i-1].parent = &newNode
 			hashedArr[i].parent = &newNode
@@ -83,16 +91,38 @@ func getWitnessProver(key string, root Node) ([]Node, error) {
 	return witnesses, nil
 }
 
+func verifyProof(key string, value string, root Node) bool {
+	witnesses, err := getWitnessProver(key, root)
+	if err != nil {
+		fmt.Println(err)
+		return false
+	}
+	fmt.Println(witnesses)
+	hash := sha256.New()
+	hash.Write([]byte(getAsciiSum(value)))
+	hashedValue := hex.EncodeToString(hash.Sum(nil))
+	lengthOfWitness := len(witnesses)
+	var elem Node
+	for lengthOfWitness > 1 {
+		lengthOfWitness = len(witnesses)
+		elem, witnesses = witnesses[lengthOfWitness-1], witnesses[:lengthOfWitness-1]
+		hash := sha256.New()
+		hash.Write([]byte(getAsciiSum(hashedValue + elem.hash)))
+		hashedValue = hex.EncodeToString(hash.Sum(nil))
+	}
+	if root.hash != hashedValue {
+		return false
+	}
+	return true
+}
+
 func main() {
 	dataList := []string{"1", "2", "3", "4", "5", "6"}
 	root := buildTree(dataList)
 	inorder(root)
 	fmt.Println()
 	key := "123456/1234/34/4"
-	witnesses, err := getWitnessProver(key, root)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(-1)
-	}
-	fmt.Println(witnesses)
+	value := "4"
+	claim := verifyProof(key, value, root)
+	fmt.Println("Claim: ", claim)
 }
