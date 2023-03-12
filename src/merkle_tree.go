@@ -5,7 +5,6 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"strconv"
 	"strings"
 )
 
@@ -17,19 +16,16 @@ type Node struct {
 	parent *Node
 }
 
-func getAsciiSum(data string) string {
-	sum := 0
-	for _, char := range data {
-		sum = sum + int(char)
-	}
-	return strconv.Itoa(sum)
+type Witness struct {
+	node   *Node
+	isLeft bool
 }
 
 func hashContent(dataList []string) []Node {
 	hashedArr := make([]Node, 0)
 	for _, data := range dataList {
 		hash := sha256.New()
-		hash.Write([]byte(getAsciiSum(data)))
+		hash.Write([]byte(data))
 		hashedArr = append(hashedArr, Node{data, hex.EncodeToString(hash.Sum(nil)), nil, nil, nil})
 	}
 	return hashedArr
@@ -42,7 +38,7 @@ func buildTree(dataList []string) Node {
 		i := 1
 		for i < len(hashedArr) {
 			hash := sha256.New()
-			hash.Write([]byte(getAsciiSum(hashedArr[i-1].hash + hashedArr[i].hash)))
+			hash.Write([]byte(hashedArr[i-1].hash + hashedArr[i].hash))
 			newNode := Node{hashedArr[i-1].key + hashedArr[i].key, hex.EncodeToString(hash.Sum(nil)), &hashedArr[i-1], &hashedArr[i], nil}
 			hashedArr[i-1].parent = &newNode
 			hashedArr[i].parent = &newNode
@@ -67,10 +63,17 @@ func inorder(root Node) {
 	}
 }
 
-func getWitnessProver(key string, root Node) ([]Node, error) {
+func printWitnesses(witnesses []Witness) {
+	fmt.Println("Witnesses: ")
+	for _, witness := range witnesses {
+		fmt.Printf("{%+v %+v}\n", *witness.node, witness.isLeft)
+	}
+}
+
+func getWitnessProver(key string, root Node) ([]Witness, error) {
 	node := root
 	keys := strings.Split(key, "/")
-	witnesses := make([]Node, 0)
+	witnesses := make([]Witness, 0)
 	for i, nodeKey := range keys {
 		if i == 0 {
 			if node.key != nodeKey {
@@ -79,10 +82,12 @@ func getWitnessProver(key string, root Node) ([]Node, error) {
 			continue
 		}
 		if node.left.key == nodeKey {
-			witnesses = append(witnesses, *node.right)
+			newWitness := Witness{node.right, false}
+			witnesses = append(witnesses, newWitness)
 			node = *node.left
 		} else if node.right.key == nodeKey {
-			witnesses = append(witnesses, *node.left)
+			newWitness := Witness{node.left, true}
+			witnesses = append(witnesses, newWitness)
 			node = *node.right
 		} else {
 			return nil, errors.New(fmt.Sprintf("key %v doesn't exist in the Merkle Tree!", nodeKey))
@@ -97,17 +102,21 @@ func verifyProof(key string, value string, root Node) bool {
 		fmt.Println(err)
 		return false
 	}
-	fmt.Println(witnesses)
+	printWitnesses(witnesses)
 	hash := sha256.New()
-	hash.Write([]byte(getAsciiSum(value)))
+	hash.Write([]byte(value))
 	hashedValue := hex.EncodeToString(hash.Sum(nil))
 	lengthOfWitness := len(witnesses)
-	var elem Node
+	var elem Witness
 	for lengthOfWitness > 1 {
 		lengthOfWitness = len(witnesses)
 		elem, witnesses = witnesses[lengthOfWitness-1], witnesses[:lengthOfWitness-1]
 		hash := sha256.New()
-		hash.Write([]byte(getAsciiSum(hashedValue + elem.hash)))
+		if elem.isLeft == true {
+			hash.Write([]byte(elem.node.hash + hashedValue))
+		} else {
+			hash.Write([]byte(hashedValue + elem.node.hash))
+		}
 		hashedValue = hex.EncodeToString(hash.Sum(nil))
 	}
 	if root.hash != hashedValue {
@@ -119,6 +128,7 @@ func verifyProof(key string, value string, root Node) bool {
 func main() {
 	dataList := []string{"1", "2", "3", "4", "5", "6"}
 	root := buildTree(dataList)
+	fmt.Println("Inorder: ")
 	inorder(root)
 	fmt.Println()
 	key := "123456/1234/34/4"
