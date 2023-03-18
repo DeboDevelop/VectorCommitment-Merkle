@@ -125,6 +125,28 @@ func verifyProof(key string, value string, root Node) bool {
 	return true
 }
 
+func getNode(key string, root Node) (*Node, error) {
+	node := root
+	keys := strings.Split(key, "/")
+	for i, nodeKey := range keys {
+		if i == 0 {
+			if node.key != nodeKey {
+				return nil, errors.New(fmt.Sprintf("key %v doesn't exist in the Merkle Tree!", nodeKey))
+			}
+			continue
+		}
+		if node.left.key == nodeKey {
+			node = *node.left
+		} else if node.right.key == nodeKey {
+			node = *node.right
+		} else {
+			return nil, errors.New(fmt.Sprintf("key %v doesn't exist in the Merkle Tree!", nodeKey))
+		}
+	}
+	fmt.Println(node)
+	return &node, nil
+}
+
 func main() {
 	dataList := []string{"1", "2", "3", "4", "5", "6"}
 	root := buildTree(dataList)
@@ -135,4 +157,9 @@ func main() {
 	value := "4"
 	claim := verifyProof(key, value, root)
 	fmt.Println("Claim: ", claim)
+	node, err := getNode(key, root)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(*node)
 }
