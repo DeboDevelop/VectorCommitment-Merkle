@@ -21,25 +21,29 @@ type Witness struct {
 	isLeft bool
 }
 
-func hashContent(dataList []string) []Node {
+func hashContent(data string) string {
+	hash := sha256.New()
+	hash.Write([]byte(data))
+	return hex.EncodeToString(hash.Sum(nil))
+}
+
+func hashLeaf(dataList []string) []Node {
 	hashedArr := make([]Node, 0)
 	for _, data := range dataList {
-		hash := sha256.New()
-		hash.Write([]byte(data))
-		hashedArr = append(hashedArr, Node{data, hex.EncodeToString(hash.Sum(nil)), nil, nil, nil})
+		hashedArr = append(hashedArr, Node{data, hashContent(data), nil, nil, nil})
 	}
 	return hashedArr
 }
 
 func buildTree(dataList []string) Node {
-	hashedArr := hashContent(dataList)
+	hashedArr := hashLeaf(dataList)
 	for len(hashedArr) > 1 {
 		hashedTreeLeaf := make([]Node, 0)
 		i := 1
 		for i < len(hashedArr) {
-			hash := sha256.New()
-			hash.Write([]byte(hashedArr[i-1].hash + hashedArr[i].hash))
-			newNode := Node{hashedArr[i-1].key + hashedArr[i].key, hex.EncodeToString(hash.Sum(nil)), &hashedArr[i-1], &hashedArr[i], nil}
+			key := hashedArr[i-1].key + hashedArr[i].key
+			hash := hashedArr[i-1].hash + hashedArr[i].hash
+			newNode := Node{key, hashContent(hash), &hashedArr[i-1], &hashedArr[i], nil}
 			hashedArr[i-1].parent = &newNode
 			hashedArr[i].parent = &newNode
 			hashedTreeLeaf = append(hashedTreeLeaf, newNode)
@@ -157,9 +161,9 @@ func main() {
 	value := "4"
 	claim := verifyProof(key, value, root)
 	fmt.Println("Claim: ", claim)
-	node, err := getNode(key, root)
-	if err != nil {
-		fmt.Println(err)
-	}
-	fmt.Println(*node)
+	// node, err := getNode(key, root)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// }
+	// fmt.Println(*node)
 }
