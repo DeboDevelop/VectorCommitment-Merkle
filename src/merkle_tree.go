@@ -27,26 +27,26 @@ func hashContent(data string) string {
 	return hex.EncodeToString(hash.Sum(nil))
 }
 
-func hashLeaf(dataList []string) []Node {
-	hashedArr := make([]Node, 0)
+func hashLeaf(dataList []string) []*Node {
+	hashedArr := make([]*Node, 0)
 	for _, data := range dataList {
-		hashedArr = append(hashedArr, Node{data, hashContent(data), nil, nil, nil})
+		hashedArr = append(hashedArr, &Node{data, hashContent(data), nil, nil, nil})
 	}
 	return hashedArr
 }
 
-func buildTree(dataList []string) Node {
+func buildTree(dataList []string) *Node {
 	hashedArr := hashLeaf(dataList)
 	for len(hashedArr) > 1 {
-		hashedTreeLeaf := make([]Node, 0)
+		hashedTreeLeaf := make([]*Node, 0)
 		i := 1
 		for i < len(hashedArr) {
 			key := hashedArr[i-1].key + hashedArr[i].key
 			hash := hashedArr[i-1].hash + hashedArr[i].hash
-			newNode := Node{key, hashContent(hash), &hashedArr[i-1], &hashedArr[i], nil}
+			newNode := Node{key, hashContent(hash), hashedArr[i-1], hashedArr[i], nil}
 			hashedArr[i-1].parent = &newNode
 			hashedArr[i].parent = &newNode
-			hashedTreeLeaf = append(hashedTreeLeaf, newNode)
+			hashedTreeLeaf = append(hashedTreeLeaf, &newNode)
 			i = i + 2
 		}
 		if len(hashedArr)%2 == 1 {
@@ -155,11 +155,11 @@ func main() {
 	dataList := []string{"1", "2", "3", "4", "5", "6"}
 	root := buildTree(dataList)
 	fmt.Println("Inorder: ")
-	inorder(root)
+	inorder(*root)
 	fmt.Println()
 	key := "123456/1234/34/4"
 	value := "4"
-	claim := verifyProof(key, value, root)
+	claim := verifyProof(key, value, *root)
 	fmt.Println("Claim: ", claim)
 	// node, err := getNode(key, root)
 	// if err != nil {
