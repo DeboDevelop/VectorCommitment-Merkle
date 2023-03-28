@@ -9,8 +9,10 @@ import (
 )
 
 func TestSingle(t *testing.T) {
-	m := tree.NewMerkleTree(3, hasher.SHA256Hasher)
-	keyPath := "etc/hello"
+	dataList := []string{"etc", "pi", "chi", "pki", "ro", "gdb", "libnl", "gss", "ldap", "opt", "bare"}
+	m := tree.NewMerkleTree(dataList, hasher.SHA256Hasher)
+	m.InOrderTraversal()
+	keyPath := "etc/pi/ro/opt"
 	w := m.GenWitnessSingleLeaf(keyPath)
 	c := m.GetCommitment()
 	if !verifier.VerifySingleLeaf(c, w, keyPath) {

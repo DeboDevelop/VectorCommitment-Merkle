@@ -1,33 +1,22 @@
 package node
 
-import (
-	"crypto/sha256"
-	"encoding/hex"
-)
-
 type Node struct {
 	key    string
-	hash   string
-	left   *Node
-	right  *Node
-	parent *Node
+	hash   []byte
+	Left   *Node
+	Right  *Node
+	Parent *Node
 	level  int64
 	index  int64
-}
-
-func hashContent(data string) string {
-	hash := sha256.New()
-	hash.Write([]byte(data))
-	return hex.EncodeToString(hash.Sum(nil))
 }
 
 func NewNode(key string, p *Node, isLeft bool) *Node {
 	n := &Node{
 		key:    key,
-		hash:   hashContent(key),
-		left:   nil,
-		right:  nil,
-		parent: p,
+		hash:   nil,
+		Left:   nil,
+		Right:  nil,
+		Parent: p,
 		level:  0,
 		index:  0,
 	}
@@ -39,4 +28,24 @@ func NewNode(key string, p *Node, isLeft bool) *Node {
 		}
 	}
 	return n
+}
+
+func (n *Node) CalculateHash(hasher func([]byte) []byte) {
+	if n == nil {
+		return
+	}
+	if n.Left == nil && n.Right == nil {
+		n.hash = hasher([]byte(n.key))
+	} else {
+		concatedHash := append(n.Left.hash, n.Right.hash...)
+		n.hash = hasher(concatedHash)
+	}
+}
+
+func (n *Node) GetKey() string {
+	return n.key
+}
+
+func (n *Node) GetHash() []byte {
+	return n.hash
 }
