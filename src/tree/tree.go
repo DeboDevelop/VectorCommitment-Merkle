@@ -1,8 +1,6 @@
 package tree
 
 import (
-	"fmt"
-
 	"github.com/DeboDevelop/MerkleProofVerifier/node"
 	wtns "github.com/DeboDevelop/MerkleProofVerifier/witness"
 )
@@ -38,17 +36,14 @@ func buildTree(dataArr []string, ind uint16, size uint16, parent *node.Node, isL
 }
 
 func (m *MerkleTree) InOrderTraversal() {
-	fmt.Println("Inorder Traversal: ")
-	inOrderTraversal(m.root)
-	fmt.Println()
+	// fmt.Println("Inorder Traversal: ")
+	// inOrderTraversal(m.root)
+	// fmt.Println()
+	// m.DownAndUp()
 }
 
-func inOrderTraversal(root *node.Node) {
-	if root != nil {
-		inOrderTraversal(root.Left)
-		fmt.Print(root.GetKey(), root.GetHash(), " ")
-		inOrderTraversal(root.Right)
-	}
+func (m *MerkleTree) Root() *node.Node {
+	return m.root
 }
 
 func (m *MerkleTree) GetCommitment() []byte {
