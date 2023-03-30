@@ -40,7 +40,7 @@ func (m *MerkleTree) Root() *node.Node {
 }
 
 func (m *MerkleTree) GetCommitment() []byte {
-	return []byte{}
+	return m.root.Hash()
 }
 
 func (m *MerkleTree) GenWitnessSingleLeaf(keyPath string) wtns.Witness {
