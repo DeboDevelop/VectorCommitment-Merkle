@@ -42,10 +42,10 @@ func (n *Node) CalculateHash(hasher func([]byte) []byte) {
 	}
 }
 
-func (n *Node) GetKey() string {
+func (n *Node) Key() string {
 	return n.key
 }
 
-func (n *Node) GetHash() []byte {
+func (n *Node) Hash() []byte {
 	return n.hash
 }
