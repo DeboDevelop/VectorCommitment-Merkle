@@ -35,13 +35,6 @@ func buildTree(dataArr []string, ind uint16, size uint16, parent *node.Node, isL
 	return root
 }
 
-func (m *MerkleTree) InOrderTraversal() {
-	// fmt.Println("Inorder Traversal: ")
-	// inOrderTraversal(m.root)
-	// fmt.Println()
-	// m.DownAndUp()
-}
-
 func (m *MerkleTree) Root() *node.Node {
 	return m.root
 }
