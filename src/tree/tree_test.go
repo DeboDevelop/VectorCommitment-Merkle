@@ -8,6 +8,7 @@ import (
 	"github.com/DeboDevelop/MerkleProofVerifier/hasher"
 	"github.com/DeboDevelop/MerkleProofVerifier/node"
 	"github.com/DeboDevelop/MerkleProofVerifier/tree"
+	wtns "github.com/DeboDevelop/MerkleProofVerifier/witness"
 )
 
 func inOrderTraversal(root *node.Node) []string {
@@ -41,7 +42,7 @@ func verifyHash(n *node.Node, hasher func([]byte) []byte) bool {
 	}
 }
 
-func DownAndUp(root *node.Node) []string {
+func downAndUp(root *node.Node) []string {
 	node := root
 	downUpArr := make([]string, 0)
 	for node.Left != nil {
@@ -54,6 +55,14 @@ func DownAndUp(root *node.Node) []string {
 		node = node.Parent
 	}
 	return downUpArr
+}
+
+func filterKeyFromWitness(witness wtns.Witness) []string {
+	keys := make([]string, 0)
+	for _, witnessNode := range witness {
+		keys = append(keys, witnessNode.Node().Key())
+	}
+	return keys
 }
 
 func TestMerkleTree(t *testing.T) {
@@ -69,7 +78,7 @@ func TestMerkleTree(t *testing.T) {
 	})
 	t.Run("Verifying the parent and child pointers", func(t *testing.T) {
 		want := []string{"etc", "pi", "pki", "gss", "gss", "pki", "pi", "etc"}
-		got := DownAndUp(m.Root())
+		got := downAndUp(m.Root())
 
 		if !reflect.DeepEqual(got, want) {
 			t.Errorf("got %v want %v given, %v", got, want, dataList)
@@ -81,6 +90,19 @@ func TestMerkleTree(t *testing.T) {
 
 		if got != want {
 			t.Errorf("got %t want %t given, %v", got, want, dataList)
+		}
+	})
+	t.Run("Verifying witness from single leaf", func(t *testing.T) {
+		keyPath := "etc/pi/ro/opt"
+		w, err := m.GenWitnessSingleLeaf(keyPath)
+		if err != nil {
+			t.Error(err)
+		}
+		got := filterKeyFromWitness(w)
+		want := []string{"chi", "pki", "bare"}
+
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("got %v want %v given, %v", got, want, dataList)
 		}
 	})
 }
