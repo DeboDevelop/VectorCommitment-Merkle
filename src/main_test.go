@@ -17,7 +17,7 @@ func TestSingle(t *testing.T) {
 		t.Error(err)
 	}
 	c := m.GetCommitment()
-	if !verifier.VerifySingleLeaf(c, w, keyPath) {
-		t.Error("Failed!")
+	if !verifier.VerifySingleLeaf(c, w, keyPath, hasher.SHA256Hasher) {
+		t.Error("Single Leaf Verification vailed! The commitment and derived commitment didn't match.")
 	}
 }

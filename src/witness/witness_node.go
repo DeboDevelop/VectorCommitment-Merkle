@@ -22,3 +22,7 @@ func NewWitnessNode(n *node.Node, isLeft bool) *WitnessNode {
 func (w *WitnessNode) Node() *node.Node {
 	return w.node
 }
+
+func (w *WitnessNode) IsLeft() bool {
+	return w.isLeft
+}
