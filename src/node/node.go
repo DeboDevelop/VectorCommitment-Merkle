@@ -49,3 +49,7 @@ func (n *Node) Key() string {
 func (n *Node) Hash() []byte {
 	return n.hash
 }
+
+func (n *Node) Level() int64 {
+	return n.level
+}

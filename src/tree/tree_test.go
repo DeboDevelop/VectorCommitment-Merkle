@@ -92,7 +92,7 @@ func TestMerkleTree(t *testing.T) {
 			t.Errorf("got %t want %t given, %v", got, want, dataList)
 		}
 	})
-	t.Run("Verifying witness from single leaf", func(t *testing.T) {
+	t.Run("Verifying witness from single leaf verification", func(t *testing.T) {
 		keyPath := "etc/pi/ro/opt"
 		w, err := m.GenWitnessSingleLeaf(keyPath)
 		if err != nil {
@@ -100,6 +100,19 @@ func TestMerkleTree(t *testing.T) {
 		}
 		got := filterKeyFromWitness(w)
 		want := []string{"chi", "pki", "bare"}
+
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("got %v want %v given, %v", got, want, dataList)
+		}
+	})
+	t.Run("Verifying witness from multi leaf verification", func(t *testing.T) {
+		keyPaths := []string{"etc/pi/ro/opt", "etc/pi/ro/bare", "etc/chi/libnl"}
+		w, err := m.GenWitnessMultipleLeaves(keyPaths)
+		if err != nil {
+			t.Error(err)
+		}
+		got := filterKeyFromWitness(w)
+		want := []string{"pki", "gdb"}
 
 		if !reflect.DeepEqual(got, want) {
 			t.Errorf("got %v want %v given, %v", got, want, dataList)
