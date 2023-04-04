@@ -111,17 +111,25 @@ func searchDataNode(dataNodes []*node.Node, keyNode node.Node) bool {
 	return false
 }
 
-func (m *MerkleTree) GenWitnessMultipleLeaves(keyPaths []string) (wtns.Witness, error) {
+func (m *MerkleTree) GetProofHints(keyPaths []string) ([]*node.Node, int64, error) {
 	keyNodes := make([]*node.Node, len(keyPaths))
 	var level int64
 	for i, key := range keyPaths {
 		data, err := m.getNode(key)
 		if err != nil {
-			return nil, err
+			return nil, -1, err
 		}
 		keyNodes[i] = data
 		keys := strings.Split(key, "/")
 		level = max(int64(len(keys))-1, level)
+	}
+	return keyNodes, level, nil
+}
+
+func (m *MerkleTree) GenWitnessMultipleLeaves(keyPaths []string) (wtns.Witness, error) {
+	keyNodes, level, err := m.GetProofHints(keyPaths)
+	if err != nil {
+		return nil, err
 	}
 	// TODO: Refactor this
 	dataNodes := make([]*node.Node, 0)
@@ -132,7 +140,6 @@ func (m *MerkleTree) GenWitnessMultipleLeaves(keyPaths []string) (wtns.Witness, 
 	}
 	lengthOfData := len(dataNodes)
 	witness := make([]wtns.WitnessNode, 0)
-	// var level int64 = 0
 	for lengthOfData > 1 {
 		newDataNode := make([]*node.Node, 0)
 		parentMap := make(map[string]int)

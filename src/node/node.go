@@ -53,3 +53,7 @@ func (n *Node) Hash() []byte {
 func (n *Node) Level() int64 {
 	return n.level
 }
+
+func (n *Node) Index() int64 {
+	return n.index
+}

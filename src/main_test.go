@@ -20,4 +20,17 @@ func TestSingle(t *testing.T) {
 	if !verifier.VerifySingleLeaf(c, w, keyPath, hasher.SHA256Hasher) {
 		t.Error("Single Leaf Verification vailed! The commitment and derived commitment didn't match.")
 	}
+	// Multiple node verification
+	keyPaths := []string{"etc/pi/ro/opt", "etc/pi/ro/bare", "etc/chi/libnl"}
+	hints, _, err := m.GetProofHints(keyPaths)
+	if err != nil {
+		t.Error(err)
+	}
+	w, err = m.GenWitnessMultipleLeaves(keyPaths)
+	if err != nil {
+		t.Error(err)
+	}
+	if !verifier.VerifyMultipleLeaf(c, w, keyPaths, hints, hasher.SHA256Hasher) {
+		t.Error("Multi Leaf Verification failed! The commitment and derived commitment didn't match.")
+	}
 }
