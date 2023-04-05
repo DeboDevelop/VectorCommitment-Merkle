@@ -104,6 +104,15 @@ func searchDataNode(dataNodes []*node.Node, keyNode node.Node) bool {
 	return false
 }
 
+func levelBasedFilteration(keyNodes []*node.Node, level int64, result []*node.Node) []*node.Node {
+	for _, keyNode := range keyNodes {
+		if keyNode.Level() == level {
+			result = append(result, keyNode)
+		}
+	}
+	return result
+}
+
 func (m *MerkleTree) GetProofHints(keyPaths []string) ([]*node.Node, int64, error) {
 	keyNodes := make([]*node.Node, len(keyPaths))
 	var level int64
@@ -124,13 +133,8 @@ func (m *MerkleTree) GenWitnessMultipleLeaves(keyPaths []string) (wtns.Witness, 
 	if err != nil {
 		return nil, err
 	}
-	// TODO: Refactor this
 	dataNodes := make([]*node.Node, 0)
-	for _, keyNode := range keyNodes {
-		if keyNode.Level() == level {
-			dataNodes = append(dataNodes, keyNode)
-		}
-	}
+	dataNodes = levelBasedFilteration(keyNodes, level, dataNodes)
 	lengthOfData := len(dataNodes)
 	witness := make([]wtns.WitnessNode, 0)
 	for lengthOfData > 1 {
@@ -155,12 +159,7 @@ func (m *MerkleTree) GenWitnessMultipleLeaves(keyPaths []string) (wtns.Witness, 
 				}
 			}
 		}
-		// TODO: Refactor this
-		for _, keyNode := range keyNodes {
-			if keyNode.Level() == level-1 {
-				newDataNode = append(newDataNode, keyNode)
-			}
-		}
+		newDataNode = levelBasedFilteration(keyNodes, level-1, newDataNode)
 		level--
 		dataNodes = newDataNode
 		lengthOfData = len(dataNodes)
