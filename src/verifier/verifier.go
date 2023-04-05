@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/DeboDevelop/MerkleProofVerifier/node"
+	"github.com/DeboDevelop/MerkleProofVerifier/utils"
 	wtns "github.com/DeboDevelop/MerkleProofVerifier/witness"
 )
 
@@ -49,14 +50,6 @@ func VerifySingleLeaf(commitment []byte, witness wtns.Witness, keyPath string, h
 	return false
 }
 
-// TODO: Move to seperate module
-func max(x, y int64) int64 {
-	if x < y {
-		return y
-	}
-	return x
-}
-
 func searchDataNode(hints []*node.Node, key string) bool {
 	for _, node := range hints {
 		if node.Key() == key {
@@ -97,7 +90,7 @@ func VerifyMultipleLeaf(commitment []byte, witness wtns.Witness, keyPaths []stri
 		if !searchDataNode(proofHints, key) {
 			return false
 		}
-		level = max(int64(lengthOfKeys)-1, level)
+		level = utils.Max(int64(lengthOfKeys)-1, level)
 	}
 	dataNodes := make([]*verifierNode, 0)
 	// TODO : Refactor this

@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/DeboDevelop/MerkleProofVerifier/node"
+	"github.com/DeboDevelop/MerkleProofVerifier/utils"
 	wtns "github.com/DeboDevelop/MerkleProofVerifier/witness"
 )
 
@@ -73,14 +74,6 @@ func (m *MerkleTree) GenWitnessSingleLeaf(keyPath string) (wtns.Witness, error) 
 	return witness, nil
 }
 
-// TODO: Move to seperate module
-func max(x, y int64) int64 {
-	if x < y {
-		return y
-	}
-	return x
-}
-
 func (m *MerkleTree) getNode(key string) (*node.Node, error) {
 	node := m.root
 	keys := strings.Split(key, "/")
@@ -121,7 +114,7 @@ func (m *MerkleTree) GetProofHints(keyPaths []string) ([]*node.Node, int64, erro
 		}
 		keyNodes[i] = data
 		keys := strings.Split(key, "/")
-		level = max(int64(len(keys))-1, level)
+		level = utils.Max(int64(len(keys))-1, level)
 	}
 	return keyNodes, level, nil
 }
