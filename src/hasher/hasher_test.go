@@ -26,4 +26,13 @@ func TestHashers(t *testing.T) {
 			t.Errorf("got %v want %v given, %v", got, want, input)
 		}
 	})
+	t.Run("Test MD5", func(t *testing.T) {
+		input := []byte("1")
+		got := hex.EncodeToString(hasher.MD5Hasher(input))
+		want := "c4ca4238a0b923820dcc509a6f75849b"
+
+		if got != want {
+			t.Errorf("got %v want %v given, %v", got, want, input)
+		}
+	})
 }
