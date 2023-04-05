@@ -78,6 +78,16 @@ func searchWitnessByLevelAndIndex(witness wtns.Witness, level int64, index int64
 	return nil
 }
 
+func levelBasedFilteration(proofHints []*node.Node, level int64, result []*verifierNode) []*verifierNode {
+	for _, hint := range proofHints {
+		if hint.Level() == level {
+			vNode := newVerifierNodeFromNode(hint)
+			result = append(result, vNode)
+		}
+	}
+	return result
+}
+
 func VerifyMultipleLeaf(commitment []byte, witness wtns.Witness, keyPaths []string, proofHints []*node.Node, hasher func([]byte) []byte) bool {
 	if len(keyPaths) != len(proofHints) {
 		return false
@@ -93,13 +103,7 @@ func VerifyMultipleLeaf(commitment []byte, witness wtns.Witness, keyPaths []stri
 		level = utils.Max(int64(lengthOfKeys)-1, level)
 	}
 	dataNodes := make([]*verifierNode, 0)
-	// TODO : Refactor this
-	for _, hint := range proofHints {
-		if hint.Level() == level {
-			dataNode := newVerifierNodeFromNode(hint)
-			dataNodes = append(dataNodes, dataNode)
-		}
-	}
+	dataNodes = levelBasedFilteration(proofHints, level, dataNodes)
 	for level > 0 {
 		newDataNode := make([]*verifierNode, 0)
 		for _, data := range dataNodes {
@@ -130,14 +134,7 @@ func VerifyMultipleLeaf(commitment []byte, witness wtns.Witness, keyPaths []stri
 			parentNode = newVerifierNode(concatedHash, data.level-1, parentIndex)
 			newDataNode = append(newDataNode, parentNode)
 		}
-		// TODO : Refactor this
-		for _, hint := range proofHints {
-			if hint.Level() == level-1 {
-				dataNode := newVerifierNodeFromNode(hint)
-				newDataNode = append(newDataNode, dataNode)
-			}
-		}
-		dataNodes = newDataNode
+		dataNodes = levelBasedFilteration(proofHints, level-1, newDataNode)
 		level--
 	}
 	if len(dataNodes) != 1 {
