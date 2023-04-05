@@ -17,4 +17,13 @@ func TestHashers(t *testing.T) {
 			t.Errorf("got %v want %v given, %v", got, want, input)
 		}
 	})
+	t.Run("Test SHA512", func(t *testing.T) {
+		input := []byte("1")
+		got := hex.EncodeToString(hasher.SHA512Hasher(input))
+		want := "4dff4ea340f0a823f15d3f4f01ab62eae0e5da579ccb851f8db9dfe84c58b2b37b89903a740e1ee172da793a6e79d560e5f7f9bd058a12a280433ed6fa46510a"
+
+		if got != want {
+			t.Errorf("got %v want %v given, %v", got, want, input)
+		}
+	})
 }
