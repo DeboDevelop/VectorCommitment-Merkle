@@ -35,4 +35,13 @@ func TestHashers(t *testing.T) {
 			t.Errorf("got %v want %v given, %v", got, want, input)
 		}
 	})
+	t.Run("Test Keccak256", func(t *testing.T) {
+		input := []byte("1")
+		got := hex.EncodeToString(hasher.Keccak256Hasher(input))
+		want := "c89efdaa54c0f20c7adf612882df0950f5a951637e0307cdcb4c672f298b8bc6"
+
+		if got != want {
+			t.Errorf("got %v want %v given, %v", got, want, input)
+		}
+	})
 }
