@@ -10,6 +10,8 @@ type Node struct {
 	index  int64
 }
 
+type Witness []*Node
+
 func NewNode(key string, p *Node, isLeft bool) *Node {
 	n := &Node{
 		key:    key,

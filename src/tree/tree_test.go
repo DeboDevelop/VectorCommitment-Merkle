@@ -8,7 +8,6 @@ import (
 	"github.com/DeboDevelop/MerkleProofVerifier/hasher"
 	"github.com/DeboDevelop/MerkleProofVerifier/node"
 	"github.com/DeboDevelop/MerkleProofVerifier/tree"
-	wtns "github.com/DeboDevelop/MerkleProofVerifier/witness"
 )
 
 func inOrderTraversal(root *node.Node) []string {
@@ -57,10 +56,10 @@ func downAndUp(root *node.Node) []string {
 	return downUpArr
 }
 
-func filterKeyFromWitness(witness wtns.Witness) []string {
+func filterKeyFromWitness(witness node.Witness) []string {
 	keys := make([]string, 0)
 	for _, witnessNode := range witness {
-		keys = append(keys, witnessNode.Node().Key())
+		keys = append(keys, witnessNode.Key())
 	}
 	return keys
 }

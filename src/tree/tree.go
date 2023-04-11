@@ -7,7 +7,6 @@ import (
 
 	"github.com/DeboDevelop/MerkleProofVerifier/node"
 	"github.com/DeboDevelop/MerkleProofVerifier/utils"
-	wtns "github.com/DeboDevelop/MerkleProofVerifier/witness"
 )
 
 type MerkleTree struct {
@@ -48,25 +47,23 @@ func (m *MerkleTree) GetCommitment() []byte {
 	return m.root.Hash()
 }
 
-func (m *MerkleTree) GenWitnessSingleLeaf(keyPath string) (wtns.Witness, error) {
-	node := m.root
+func (m *MerkleTree) GenWitnessSingleLeaf(keyPath string) (node.Witness, error) {
+	root := m.root
 	keys := strings.Split(keyPath, "/")
-	witness := make([]wtns.WitnessNode, 0)
+	witness := make([]*node.Node, 0)
 	for i, nodeKey := range keys {
 		if i == 0 {
-			if node.Key() != nodeKey {
+			if root.Key() != nodeKey {
 				return nil, errors.New(fmt.Sprintf("key %v doesn't exist in the Merkle Tree!", nodeKey))
 			}
 			continue
 		}
-		if node.Left.Key() == nodeKey {
-			newWitnessNode := wtns.NewWitnessNode(node.Right, false)
-			witness = append(witness, *newWitnessNode)
-			node = node.Left
-		} else if node.Right.Key() == nodeKey {
-			newWitnessNode := wtns.NewWitnessNode(node.Left, true)
-			witness = append(witness, *newWitnessNode)
-			node = node.Right
+		if root.Left.Key() == nodeKey {
+			witness = append(witness, root.Right)
+			root = root.Left
+		} else if root.Right.Key() == nodeKey {
+			witness = append(witness, root.Left)
+			root = root.Right
 		} else {
 			return nil, errors.New(fmt.Sprintf("key %v doesn't exist in the Merkle Tree!", nodeKey))
 		}
@@ -75,24 +72,24 @@ func (m *MerkleTree) GenWitnessSingleLeaf(keyPath string) (wtns.Witness, error) 
 }
 
 func (m *MerkleTree) getNode(key string) (*node.Node, error) {
-	node := m.root
+	root := m.root
 	keys := strings.Split(key, "/")
 	for i, nodeKey := range keys {
 		if i == 0 {
-			if node.Key() != nodeKey {
+			if root.Key() != nodeKey {
 				return nil, errors.New(fmt.Sprintf("key %v doesn't exist in the Merkle Tree!", nodeKey))
 			}
 			continue
 		}
-		if node.Left.Key() == nodeKey {
-			node = node.Left
-		} else if node.Right.Key() == nodeKey {
-			node = node.Right
+		if root.Left.Key() == nodeKey {
+			root = root.Left
+		} else if root.Right.Key() == nodeKey {
+			root = root.Right
 		} else {
 			return nil, errors.New(fmt.Sprintf("key %v doesn't exist in the Merkle Tree!", nodeKey))
 		}
 	}
-	return node, nil
+	return root, nil
 }
 
 func searchDataNode(dataNodes []*node.Node, keyNode node.Node) bool {
@@ -128,7 +125,7 @@ func (m *MerkleTree) GetProofHints(keyPaths []string) ([]*node.Node, int64, erro
 	return keyNodes, level, nil
 }
 
-func (m *MerkleTree) GenWitnessMultipleLeaves(keyPaths []string) (wtns.Witness, error) {
+func (m *MerkleTree) GenWitnessMultipleLeaves(keyPaths []string) (node.Witness, error) {
 	keyNodes, level, err := m.GetProofHints(keyPaths)
 	if err != nil {
 		return nil, err
@@ -136,21 +133,21 @@ func (m *MerkleTree) GenWitnessMultipleLeaves(keyPaths []string) (wtns.Witness, 
 	dataNodes := make([]*node.Node, 0)
 	dataNodes = levelBasedFilteration(keyNodes, level, dataNodes)
 	lengthOfData := len(dataNodes)
-	witness := make([]wtns.WitnessNode, 0)
+	witness := make([]*node.Node, 0)
 	for lengthOfData > 1 {
 		newDataNode := make([]*node.Node, 0)
 		parentMap := make(map[string]int)
 		for _, data := range dataNodes {
 			var isWitnessPresent bool
-			var witnessNode *wtns.WitnessNode
+			var witnessNode *node.Node
 			if data.Parent.Left.Key() == data.Key() {
-				witnessNode = wtns.NewWitnessNode(data.Parent.Right, false)
+				witnessNode = data.Parent.Right
 			} else {
-				witnessNode = wtns.NewWitnessNode(data.Parent.Left, true)
+				witnessNode = data.Parent.Left
 			}
-			isWitnessPresent = searchDataNode(dataNodes, *witnessNode.Node())
+			isWitnessPresent = searchDataNode(dataNodes, *witnessNode)
 			if !isWitnessPresent {
-				witness = append(witness, *witnessNode)
+				witness = append(witness, witnessNode)
 			}
 			if _, ok := parentMap[(*data.Parent).Key()]; !ok {
 				if data.Parent != m.root {

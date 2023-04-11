@@ -6,7 +6,6 @@ import (
 
 	"github.com/DeboDevelop/MerkleProofVerifier/node"
 	"github.com/DeboDevelop/MerkleProofVerifier/utils"
-	wtns "github.com/DeboDevelop/MerkleProofVerifier/witness"
 )
 
 type verifierNode struct {
@@ -28,19 +27,19 @@ func newVerifierNodeFromNode(node *node.Node) *verifierNode {
 	return newVerifierNode(node.Hash(), node.Level(), node.Index())
 }
 
-func VerifySingleLeaf(commitment []byte, witness wtns.Witness, keyPath string, hasher func([]byte) []byte) bool {
+func VerifySingleLeaf(commitment []byte, witness node.Witness, keyPath string, hasher func([]byte) []byte) bool {
 	lengthOfWitness := len(witness)
-	var elem wtns.WitnessNode
+	var elem *node.Node
 	keys := strings.Split(keyPath, "/")
 	hashedValue := hasher([]byte(keys[len(keys)-1]))
 	for lengthOfWitness > 1 {
 		lengthOfWitness = len(witness)
 		elem, witness = witness[lengthOfWitness-1], witness[:lengthOfWitness-1]
-		if elem.IsLeft() == true {
-			concatedHash := append(elem.Node().Hash(), hashedValue...)
+		if elem.Index()%2 == 0 {
+			concatedHash := append(elem.Hash(), hashedValue...)
 			hashedValue = hasher(concatedHash)
 		} else {
-			concatedHash := append(hashedValue, elem.Node().Hash()...)
+			concatedHash := append(hashedValue, elem.Hash()...)
 			hashedValue = hasher(concatedHash)
 		}
 	}
@@ -68,10 +67,10 @@ func searchNodeByLevelAndIndex(nodes []*verifierNode, level int64, index int64) 
 	return nil
 }
 
-func searchWitnessByLevelAndIndex(witness wtns.Witness, level int64, index int64) *verifierNode {
+func searchWitnessByLevelAndIndex(witness node.Witness, level int64, index int64) *verifierNode {
 	for _, witnessNode := range witness {
-		if witnessNode.Node().Level() == level && witnessNode.Node().Index() == index {
-			node := newVerifierNodeFromNode(witnessNode.Node())
+		if witnessNode.Level() == level && witnessNode.Index() == index {
+			node := newVerifierNodeFromNode(witnessNode)
 			return node
 		}
 	}
@@ -88,7 +87,7 @@ func levelBasedFilteration(proofHints []*node.Node, level int64, result []*verif
 	return result
 }
 
-func VerifyMultipleLeaf(commitment []byte, witness wtns.Witness, keyPaths []string, proofHints []*node.Node, hasher func([]byte) []byte) bool {
+func VerifyMultipleLeaf(commitment []byte, witness node.Witness, keyPaths []string, proofHints []*node.Node, hasher func([]byte) []byte) bool {
 	if len(keyPaths) != len(proofHints) {
 		return false
 	}
