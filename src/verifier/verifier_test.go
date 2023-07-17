@@ -1,4 +1,4 @@
-package main_test
+package verifier_test
 
 import (
 	"testing"
