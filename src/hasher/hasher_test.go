@@ -53,4 +53,13 @@ func TestHashers(t *testing.T) {
 			t.Errorf("got %v want %v given, %v", got, want, input)
 		}
 	})
+	t.Run("Test MIMC7", func(t *testing.T) {
+		input := []byte("1")
+		got := hex.EncodeToString(hasher.MIMC7Hasher(input))
+		want := "04ca2453ae68fc1bb856aa78cf034f359f371f3e8ebb1db55eaa2306641c00a0"
+
+		if got != want {
+			t.Errorf("got %v want %v given, %v", got, want, input)
+		}
+	})
 }

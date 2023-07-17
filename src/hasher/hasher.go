@@ -7,6 +7,7 @@ import (
 	"math/big"
 
 	"github.com/Codzart/go-ethereum/crypto/sha3"
+	"github.com/iden3/go-iden3-crypto/mimc7"
 	"github.com/iden3/go-iden3-crypto/poseidon"
 )
 
@@ -36,6 +37,14 @@ func Keccak256Hasher(data []byte) []byte {
 
 func PoseidonHasher(data []byte) []byte {
 	hash, err := poseidon.Hash(byteToBigInt(data))
+	if err != nil {
+		panic(err)
+	}
+	return hash.Bytes()
+}
+
+func MIMC7Hasher(data []byte) []byte {
+	hash, err := mimc7.Hash(byteToBigInt(data), nil)
 	if err != nil {
 		panic(err)
 	}
