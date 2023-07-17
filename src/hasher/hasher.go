@@ -14,13 +14,13 @@ import (
 
 // SHA256Hasher returns the SHA256 hash of given input
 //
-// It takes one array of bytes.
+// It takes one slice of bytes.
 //
 // Parameters:
-// - data: Input data as array of bytes
+// - data: Input data as slice of bytes
 //
 // Returns:
-// - Hashed data as array of bytes
+// - Hashed data as slice of bytes
 //
 // Example:
 //
@@ -34,13 +34,13 @@ func SHA256Hasher(data []byte) []byte {
 
 // SHA512Hasher returns the SHA512 hash of given input
 //
-// It takes one array of bytes.
+// It takes one slice of bytes.
 //
 // Parameters:
-// - data: Input data as array of bytes
+// - data: Input data as slice of bytes
 //
 // Returns:
-// - Hashed data as array of bytes
+// - Hashed data as slice of bytes
 //
 // Example:
 //
@@ -54,13 +54,13 @@ func SHA512Hasher(data []byte) []byte {
 
 // MD5Hasher returns the MD5 hash of given input
 //
-// It takes one array of bytes.
+// It takes one slice of bytes.
 //
 // Parameters:
-// - data: Input data as array of bytes
+// - data: Input data as slice of bytes
 //
 // Returns:
-// - Hashed data as array of bytes
+// - Hashed data as slice of bytes
 //
 // Example:
 //
@@ -74,13 +74,13 @@ func MD5Hasher(data []byte) []byte {
 
 // Keccak256Hasher returns the Keccak256 hash of given input
 //
-// It takes one array of bytes.
+// It takes one slice of bytes.
 //
 // Parameters:
-// - data: Input data as array of bytes
+// - data: Input data as slice of bytes
 //
 // Returns:
-// - Hashed data as array of bytes
+// - Hashed data as slice of bytes
 //
 // Example:
 //
@@ -94,13 +94,13 @@ func Keccak256Hasher(data []byte) []byte {
 
 // PoseidonHasher returns the Poseidon hash of given input
 //
-// It takes one array of bytes.
+// It takes one slice of bytes.
 //
 // Parameters:
-// - data: Input data as array of bytes
+// - data: Input data as slice of bytes
 //
 // Returns:
-// - Hashed data as array of bytes
+// - Hashed data as slice of bytes
 //
 // Example:
 //
@@ -116,13 +116,13 @@ func PoseidonHasher(data []byte) []byte {
 
 // MIMC7Hasher returns the MIMC7 hash of given input
 //
-// It takes one array of bytes.
+// It takes one slice of bytes.
 //
 // Parameters:
-// - data: Input data as array of bytes
+// - data: Input data as slice of bytes
 //
 // Returns:
-// - Hashed data as array of bytes
+// - Hashed data as slice of bytes
 //
 // Example:
 //
