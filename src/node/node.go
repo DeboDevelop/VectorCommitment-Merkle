@@ -23,8 +23,8 @@ type Witness []*Node
 //
 // Parameters:
 // - key: key of the node as string
-// - p - parent of the node as *Node
-// - isLeft - bool representing whether node is left child or not
+// - p: parent of the node as *Node
+// - isLeft: bool representing whether node is left child or not
 //
 // Returns:
 // - a new *Node

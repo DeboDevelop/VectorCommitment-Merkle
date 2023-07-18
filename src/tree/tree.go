@@ -1,3 +1,5 @@
+// Tree is a package which provides an implementation of Merkle tree as well as a necessary
+// functions required by the prover.
 package tree
 
 import (
@@ -9,11 +11,27 @@ import (
 	"github.com/DeboDevelop/MerkleProofVerifier/utils"
 )
 
+// MerkleTree struct is used to represent a merkle tree and the hash function required for computation.
 type MerkleTree struct {
-	root   *node.Node
-	hasher func([]byte) []byte
+	root   *node.Node          // Root of the merkle tree
+	hasher func([]byte) []byte // hash function used for generating the tree
 }
 
+// NewMerkleTree returns a new merkleTree created from given input.
+//
+// It takes slice of keys represented similar to binary heap as well as a hasher function.
+//
+// Parameters:
+// - dataArr: Slice of keys represented as binary heap
+// - hasher: hasher function used for hashing during the creation of merkle tree
+//
+// Returns:
+// - a new *MerkleTree
+//
+// Example:
+//
+//	tree := MerkleTree(["1", "2", "3"], hasher.SHA256Hasher)
+//	fmt.Println(tree.Root())
 func NewMerkleTree(dataArr []string, hasher func([]byte) []byte) *MerkleTree {
 	lenOfData := uint16(len(dataArr))
 	node := buildTree(dataArr, 0, lenOfData, nil, false, hasher)
@@ -24,6 +42,26 @@ func NewMerkleTree(dataArr []string, hasher func([]byte) []byte) *MerkleTree {
 	return merkleTree
 }
 
+// buildTree performs the computation needed to create the root of the merkle tree.
+//
+// It takes slice of keys represented similar to binary heap, current index of slice,
+// size of the slice, parent node, isLeft and hasher function.
+//
+// Parameters:
+// - dataArr: Slice of keys represented as binary heap
+// - ind: Index of the slice (dataArr) represented by uint16
+// - size: Length of the slice (dataArr) represented by uint16
+// - parent: parent node of curr root representd by *node.Node
+// - isLeft: bool representing whether curr root is a left child or not
+// - hasher: hasher function used for hashing during the creation of merkle tree
+//
+// Returns:
+// - a new *Node representing root.
+//
+// Example:
+//
+//	root := buildTree(["1", "2", "3"], 0, 3, nil, false, hasher.SHA256Hasher)
+//	fmt.Println(root)
 func buildTree(dataArr []string, ind uint16, size uint16, parent *node.Node, isLeft bool, hasher func([]byte) []byte) *node.Node {
 	var root *node.Node
 
@@ -39,14 +77,47 @@ func buildTree(dataArr []string, ind uint16, size uint16, parent *node.Node, isL
 	return root
 }
 
+// Root is a getter function to get the root of the merkle tree.
+//
+// Returns:
+// - The root of the tree as node
+//
+// Example:
+//
+//	tree := MerkleTree(["1", "2", "3"], hasher.SHA256Hasher)
+//	fmt.Println(tree.Root())
 func (m *MerkleTree) Root() *node.Node {
 	return m.root
 }
 
+// GetCommitment is a getter function to get the hash of the root of the merkle tree.
+//
+// Returns:
+// - The hash of the root of the tree as node
+//
+// Example:
+//
+//	tree := MerkleTree(["1", "2", "3"], hasher.SHA256Hasher)
+//	fmt.Println(tree.GetCommitment())
 func (m *MerkleTree) GetCommitment() []byte {
 	return m.root.Hash()
 }
 
+// GenWitnessSingleLeaf generates the witnesses required by the verifier for a single leaf.
+//
+// It takes the key path for single leaf.
+//
+// Parameters:
+// - keyPath: key path of the leaf represented by string
+//
+// Returns:
+// - The witnesses as Witness (slice of nodes)
+// - any error
+//
+// Example:
+//
+//	tree := MerkleTree(["1", "2", "3"], hasher.SHA256Hasher)
+//	witness, err := tree.GenWitnessSingleLeaf("1/2")
 func (m *MerkleTree) GenWitnessSingleLeaf(keyPath string) (node.Witness, error) {
 	root := m.root
 	keys := strings.Split(keyPath, "/")
@@ -71,6 +142,21 @@ func (m *MerkleTree) GenWitnessSingleLeaf(keyPath string) (node.Witness, error) 
 	return witness, nil
 }
 
+// getNode returns a single leaf node from given path.
+//
+// It takes the key path for the leaf.
+//
+// Parameters:
+// - key: key path of the leaf represented by string
+//
+// Returns:
+// - leaf node represented by *Node
+// - any error
+//
+// Example:
+//
+//	tree := MerkleTree(["1", "2", "3"], hasher.SHA256Hasher)
+//	node, err := tree.getNode("1/2")
 func (m *MerkleTree) getNode(key string) (*node.Node, error) {
 	root := m.root
 	keys := strings.Split(key, "/")
@@ -92,6 +178,23 @@ func (m *MerkleTree) getNode(key string) (*node.Node, error) {
 	return root, nil
 }
 
+// searchDataNode checks whether a key node exist given a slice of nodes
+//
+// It takes the slice of nodes and a key node.
+//
+// Parameters:
+// - dataNodes: Slice of nodes
+// - keyNode: A single node, key to be searched
+//
+// Returns:
+// - key found or not represented bool
+//
+// Example:
+//
+//	tree := MerkleTree(["1", "2", "3"], hasher.SHA256Hasher)
+//	node1, err := tree.getNode("1/2")
+//	node2, err := tree.getNode("1/3")
+//	found := searchDataNode([node1, node2], node2)
 func searchDataNode(dataNodes []*node.Node, keyNode node.Node) bool {
 	for _, data := range dataNodes {
 		if data.Key() == keyNode.Key() {
@@ -101,6 +204,25 @@ func searchDataNode(dataNodes []*node.Node, keyNode node.Node) bool {
 	return false
 }
 
+// levelBasedFilteration filters nodes froma slice of node based on given level and
+// append them to given result.
+//
+// It takes the slice of nodes, level and result.
+//
+// Parameters:
+// - keyNodes: Slice of nodes
+// - level: required level as in64
+// - result: Slice of nodes already containing nodes of the given level
+//
+// Returns:
+// - slice of nodes all containing the same level
+//
+// Example:
+//
+//	tree := MerkleTree(["1", "2", "3"], hasher.SHA256Hasher)
+//	node1, err := tree.getNode("1/2")
+//	node2, err := tree.getNode("1")
+//	result := levelBasedFilteration([node1, node2], 0, make([]*node.Node, 0))
 func levelBasedFilteration(keyNodes []*node.Node, level int64, result []*node.Node) []*node.Node {
 	for _, keyNode := range keyNodes {
 		if keyNode.Level() == level {
@@ -110,6 +232,22 @@ func levelBasedFilteration(keyNodes []*node.Node, level int64, result []*node.No
 	return result
 }
 
+// GetProofHints gives proof hints including nodes from key paths and max level of node.
+//
+// It takes the slice of key paths for multiple leaves.
+//
+// Parameters:
+// - keyPaths: slice of key path of the leaves represented by slice of string
+//
+// Returns:
+// - slice of nodes derived from keypaths
+// - max level represented by int64
+// - any error
+//
+// Example:
+//
+//	tree := MerkleTree(["1", "2", "3"], hasher.SHA256Hasher)
+//	hints, level, err := GetProofHints(["1/2", "1/3"])
 func (m *MerkleTree) GetProofHints(keyPaths []string) ([]*node.Node, int64, error) {
 	keyNodes := make([]*node.Node, len(keyPaths))
 	var level int64
@@ -125,6 +263,21 @@ func (m *MerkleTree) GetProofHints(keyPaths []string) ([]*node.Node, int64, erro
 	return keyNodes, level, nil
 }
 
+// GenWitnessMultipleLeaves generates the witnesses required by the verifier for a multiple leaves.
+//
+// It takes the slice of key paths for multiple leaves.
+//
+// Parameters:
+// - keyPath: slice of key path of the leaves represented by slice of string
+//
+// Returns:
+// - The witnesses as Witness (slice of nodes)
+// - any error
+//
+// Example:
+//
+//	tree := MerkleTree(["1", "2", "3"], hasher.SHA256Hasher)
+//	witness, err := tree.GenWitnessMultipleLeaves(["1/2", "1/3"])
 func (m *MerkleTree) GenWitnessMultipleLeaves(keyPaths []string) (node.Witness, error) {
 	keyNodes, level, err := m.GetProofHints(keyPaths)
 	if err != nil {
