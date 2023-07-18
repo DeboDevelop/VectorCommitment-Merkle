@@ -178,7 +178,7 @@ func (m *MerkleTree) getNode(key string) (*node.Node, error) {
 	return root, nil
 }
 
-// searchDataNode checks whether a key node exist given a slice of nodes
+// searchDataNode does linear search on slice of nodes
 //
 // It takes the slice of nodes and a key node.
 //
@@ -211,11 +211,11 @@ func searchDataNode(dataNodes []*node.Node, keyNode node.Node) bool {
 //
 // Parameters:
 // - keyNodes: Slice of nodes
-// - level: required level as in64
+// - level: required level as int64
 // - result: Slice of nodes already containing nodes of the given level
 //
 // Returns:
-// - slice of nodes all containing the same level
+// - Slice of nodes all containing the same level
 //
 // Example:
 //
