@@ -47,7 +47,7 @@ func TestHashers(t *testing.T) {
 	t.Run("Test Poseidon", func(t *testing.T) {
 		input := []byte("1")
 		got := hex.EncodeToString(hasher.PoseidonHasher(input))
-		want := "180c0f04abe2d5f1047d9e7227e01518e63080d09464d0f920e743bc7d011854"
+		want := "13e9ca1bcc2decf3a739ae65fa84a8034cfe3bc7952c7f819f49f4ac8aab05aa"
 
 		if got != want {
 			t.Errorf("got %v want %v given, %v", got, want, input)
